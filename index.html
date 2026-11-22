@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <title>STRATA · Mine Operations</title>
+    <!-- the sign-in page opens on this still while its first clip starts, so it never shows a black frame -->
+    <link rel="preload" as="image" href="/hero/48993.webp" fetchpriority="high" />
+    <script>
+      try {
+        var t = localStorage.getItem('strata-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
