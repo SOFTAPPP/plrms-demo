@@ -123,7 +123,15 @@ export function DiggerDiagram({ m }: { m: MachineLive }) {
   );
 }
 
-export function SensorPanel({ machineId }: { machineId: string }) {
+export function SensorPanel({
+  machineId,
+  picker,
+  header,
+}: {
+  machineId: string;
+  picker?: React.ReactNode;
+  header?: React.ReactNode;
+}) {
   const m = useMachine(machineId);
   const defs = useMachineDefs(m);
   const [selectedGroup, setSelectedGroup] = useState<'all' | SensorGroup>('all');
@@ -138,16 +146,42 @@ export function SensorPanel({ machineId }: { machineId: string }) {
 
   if (!m) return <EmptyState title="Machine not reporting" message="Waiting for live data from this machine." />;
 
+  const hasEquipmentCard = Boolean(m.tp || m.type === 'shovel' || m.type === 'excavator' || m.type === 'loader');
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="panel p-4"><SensorGauges m={m} defs={defs} /></div>
-      {(m.tp || m.type === 'shovel' || m.type === 'excavator' || m.type === 'loader') && (
-        <div className="panel p-4">
-          <p className="mb-2 font-display text-sm font-semibold">{m.tp ? 'Tyre monitoring' : 'Work equipment position'}</p>
-          {m.tp ? <TyreDiagram m={m} /> : <DiggerDiagram m={m} />}
+      {picker ? (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)] items-stretch">
+          <div className="h-[360px] lg:h-full lg:relative">
+            <div className="h-full lg:absolute lg:inset-0">
+              {picker}
+            </div>
+          </div>
+          <div className="min-w-0 flex flex-col gap-3 min-h-[380px]">
+            {header}
+            <div className="panel p-4"><SensorGauges m={m} defs={defs} /></div>
+            {hasEquipmentCard && (
+              <div className="panel p-4">
+                <p className="mb-2 font-display text-sm font-semibold">{m.tp ? 'Tyre monitoring' : 'Work equipment position'}</p>
+                {m.tp ? <TyreDiagram m={m} /> : <DiggerDiagram m={m} />}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {header}
+          <div className="panel p-4"><SensorGauges m={m} defs={defs} /></div>
+          {hasEquipmentCard && (
+            <div className="panel p-4">
+              <p className="mb-2 font-display text-sm font-semibold">{m.tp ? 'Tyre monitoring' : 'Work equipment position'}</p>
+              {m.tp ? <TyreDiagram m={m} /> : <DiggerDiagram m={m} />}
+            </div>
+          )}
         </div>
       )}
 
+      {/* Telemetry & Subsystems - spans full width across the page */}
       <div className="panel flex flex-col gap-4 p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3.5">
           <div className="flex items-center gap-2.5">
@@ -220,13 +254,13 @@ export function SensorPanel({ machineId }: { machineId: string }) {
 
         {/* Telemetry Display */}
         {viewMode === 'grid' || selectedGroup !== 'all' ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
             {filteredDefs.map((d) => (
               <SensorTile key={d.key} def={d} m={m} showGroup={selectedGroup === 'all'} />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3 items-start">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 items-start">
             {groups.map((g) => {
               const groupDefs = defs.filter((d) => d.group === g);
               const hasCrit = groupDefs.some((d) => sensorState(d, m.s[d.key]) === 'critical');

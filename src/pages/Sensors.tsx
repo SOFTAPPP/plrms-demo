@@ -18,15 +18,15 @@ import { TelemetryChart } from './MachineDetail';
 
 const MATRIX_KEYS = ['engine_temp', 'rpm', 'fuel_level', 'battery', 'payload_pct', 'tyre_pressure', 'tyre_temp', 'brake_temp', 'hyd_pressure', 'vibration'];
 
-function MachinePicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+function MachinePicker({ value, onChange, className }: { value: string; onChange: (id: string) => void; className?: string }) {
   const machines = useLive((s) => s.machines);
   const p = usePalette();
   const [q, setQ] = useState('');
   const list = Object.values(machines).filter((m) => !q || m.id.toLowerCase().includes(q.toLowerCase())).sort((a, b) => a.id.localeCompare(b.id));
   return (
-    <div className="panel flex max-h-[calc(100vh-230px)] flex-col">
+    <div className={cn('panel flex flex-col overflow-hidden', className ?? 'h-full')}>
       <div className="border-b border-line p-2.5"><SearchInput value={q} onChange={setQ} placeholder="Find machine" /></div>
-      <ul className="scroll-thin flex-1 overflow-y-auto p-1.5">
+      <ul className="scroll-thin min-h-0 flex-1 overflow-y-auto p-1.5">
         {MACHINE_TYPES.map((t) => {
           const ms = list.filter((m) => m.type === t);
           if (!ms.length) return null;
@@ -106,19 +106,34 @@ export default function Sensors() {
         { value: 'matrix', label: 'Fleet matrix', icon: <Grid3x3 className="h-4 w-4" /> },
         { value: 'history', label: 'History', icon: <LineChart className="h-4 w-4" /> },
       ]} />
-      {tab === 'matrix' ? <Matrix /> : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
-          <MachinePicker value={machineId} onChange={setSel} />
-          <div className="min-w-0">
+      {tab === 'matrix' ? (
+        <Matrix />
+      ) : tab === 'history' ? (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)] items-stretch">
+          <MachinePicker value={machineId} onChange={setSel} className="h-full min-h-[520px]" />
+          <div className="min-w-0 flex flex-col gap-3">
             {m && (
-              <div className="mb-3 flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-display text-lg font-semibold">{m.id}</h2><StatusPill status={m.st} />
                 <span className="text-sm text-muted">{m.act} · {m.zone} · {m.op || 'no operator'}</span>
               </div>
             )}
-            {tab === 'live' ? <SensorPanel machineId={machineId} /> : <TelemetryChart key={machineId} machineId={machineId} initialKey="e_temp" height={520} />}
+            <TelemetryChart key={machineId} machineId={machineId} initialKey="e_temp" height={520} />
           </div>
         </div>
+      ) : (
+        <SensorPanel
+          machineId={machineId}
+          picker={<MachinePicker value={machineId} onChange={setSel} />}
+          header={
+            m && (
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-display text-lg font-semibold">{m.id}</h2><StatusPill status={m.st} />
+                <span className="text-sm text-muted">{m.act} · {m.zone} · {m.op || 'no operator'}</span>
+              </div>
+            )
+          }
+        />
       )}
     </div>
   );
