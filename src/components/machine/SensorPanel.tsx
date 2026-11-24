@@ -32,7 +32,7 @@ const SensorTile = memo(function SensorTile({
   return (
     <div
       className={cn(
-        'flex flex-col justify-between rounded-xl border bg-panel-2/60 p-3 min-h-[102px]',
+        'flex flex-col justify-between rounded-lg border bg-panel-2/60 p-3 min-h-[102px]',
         state === 'critical' ? 'border-crit/40' : state === 'warning' ? 'border-warn/40' : 'border-line'
       )}
     >

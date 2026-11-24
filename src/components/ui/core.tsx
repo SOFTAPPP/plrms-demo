@@ -10,7 +10,7 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
 type Size = 'xs' | 'sm' | 'md' | 'icon' | 'icon-sm';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-accent text-accent-fg hover:brightness-110 shadow-[0_0_0_1px_rgba(0,0,0,0.15)_inset] font-semibold',
+  primary: 'bg-accent text-accent-fg hover:brightness-110 font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.3)]',
   secondary: 'bg-elev text-fg border border-line-strong hover:bg-panel-2',
   ghost: 'text-muted hover:text-fg hover:bg-fg/[0.06]',
   danger: 'bg-crit/12 text-crit border border-crit/30 hover:bg-crit/20',
@@ -64,13 +64,21 @@ const TONES: Record<Tone, string> = {
   blue: 'bg-blue/12 text-blue border-blue/25',
 };
 const DOTS: Record<Tone, string> = {
-  neutral: 'bg-faint', accent: 'bg-accent', ok: 'bg-ok', warn: 'bg-warn', crit: 'bg-crit', info: 'bg-info', violet: 'bg-violet', cyan: 'bg-cyan', blue: 'bg-blue',
+  neutral: 'bg-faint',
+  accent: 'bg-accent',
+  ok: 'bg-ok shadow-[0_0_6px_var(--ok)]',
+  warn: 'bg-warn shadow-[0_0_6px_var(--warn)]',
+  crit: 'bg-crit shadow-[0_0_6px_var(--crit)] animate-pulse',
+  info: 'bg-info',
+  violet: 'bg-violet',
+  cyan: 'bg-cyan',
+  blue: 'bg-blue',
 };
 
 export function Badge({ tone = 'neutral', children, className, dot }: { tone?: Tone; children: ReactNode; className?: string; dot?: boolean }) {
   return (
     <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border px-1.5 py-0.5 text-[11px] font-medium leading-4', TONES[tone], className)}>
-      {dot && <span className={cn('h-1.5 w-1.5 rounded-full', DOTS[tone])} />}
+      {dot && <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', DOTS[tone])} />}
       {children}
     </span>
   );
@@ -98,7 +106,7 @@ export function Card({ title, subtitle, actions, children, className, bodyClassN
   title?: ReactNode; subtitle?: ReactNode; actions?: ReactNode; children?: ReactNode; className?: string; bodyClassName?: string; icon?: ReactNode; flush?: boolean;
 }) {
   return (
-    <section className={cn('panel hairline-top flex min-w-0 flex-col', className)}>
+    <section className={cn('panel hairline-top flex min-w-0 flex-col overflow-hidden', className)}>
       {(title || actions) && (
         <header className="flex min-h-12 items-center gap-3 border-b border-line px-4 py-2.5">
           {icon && <span className="text-muted">{icon}</span>}

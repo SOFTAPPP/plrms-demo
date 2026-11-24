@@ -80,12 +80,20 @@ export const Gauge = memo(function Gauge({ value, min, max, warn, crit, dir, lab
   );
 });
 
-export function Meter({ value, max, warnAt, color, className, height = 6 }: { value: number; max: number; warnAt?: number; color?: string; className?: string; height?: number }) {
+export function Meter({ value, max, warnAt, color, className, height = 7 }: { value: number; max: number; warnAt?: number; color?: string; className?: string; height?: number }) {
   const pct = Math.max(0, Math.min(100, (value / (max || 1)) * 100));
   return (
     <div className={cn('relative w-full overflow-hidden rounded-full bg-fg/[0.08]', className)} style={{ height }}>
-      <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${pct}%`, background: color ?? 'var(--accent)' }} />
-      {warnAt !== undefined && <div className="absolute top-0 h-full w-px bg-fg/40" style={{ left: `${(warnAt / max) * 100}%` }} />}
+      <div
+        className="h-full rounded-full transition-[width] duration-500"
+        style={{ width: `${pct}%`, background: color ?? 'var(--accent)' }}
+      />
+      {warnAt !== undefined && (
+        <div
+          className="absolute top-0 h-full w-px bg-fg/40"
+          style={{ left: `${(warnAt / max) * 100}%` }}
+        />
+      )}
     </div>
   );
 }
@@ -107,7 +115,7 @@ export function Ring({ value, size = 44, stroke = 5, color = 'var(--accent)', ch
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--line-strong)" strokeWidth={stroke} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--line-strong)" strokeWidth={stroke} fill="none" opacity={0.35} />
         <circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={stroke} fill="none" strokeLinecap="round"
           strokeDasharray={c} strokeDashoffset={c * (1 - Math.max(0, Math.min(1, value)))} style={{ transition: 'stroke-dashoffset 600ms ease' }} />
       </svg>

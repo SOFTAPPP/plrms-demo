@@ -26,13 +26,13 @@ export interface Palette {
 }
 
 const dark: Palette = {
-  bg: '#131313', panel: '#1b1b1b', panel2: '#212121', line: 'rgba(255,255,255,0.09)', lineStrong: 'rgba(255,255,255,0.2)',
-  fg: '#ededed', muted: '#a1a1a1', faint: '#6e6e6e', accent: '#f5a524', ok: '#34d399', warn: '#fbbf24', crit: '#fb7185',
-  info: '#38bdf8', violet: '#a78bfa', cyan: '#22d3ee', blue: '#60a5fa',
-  series: ['#f5a524', '#22d3ee', '#a78bfa', '#34d399', '#fb7185', '#60a5fa', '#f472b6', '#facc15', '#2dd4bf', '#c084fc'],
-  status: { running: '#34d399', loading: '#22d3ee', hauling: '#60a5fa', idle: '#fbbf24', breakdown: '#fb7185', maintenance: '#a78bfa', offline: '#6e6e6e' },
-  severity: { info: '#38bdf8', warning: '#fbbf24', critical: '#fb7185' },
-  map: { ground: '#171717', groundAlt: '#1c1c1c', bench: '#232323', benchLine: 'rgba(205,180,140,0.16)', road: '#333333', roadEdge: '#444444', zone: 'rgba(255,255,255,0.05)', water: '#123247', dump: '#262626' },
+  bg: '#111216', panel: '#181a20', panel2: '#1f222a', line: 'rgba(255,255,255,0.08)', lineStrong: 'rgba(255,255,255,0.18)',
+  fg: '#f1f3f7', muted: '#9aa5b6', faint: '#64748b', accent: '#f59e0b', ok: '#10b981', warn: '#f59e0b', crit: '#ef4444',
+  info: '#0ea5e9', violet: '#8b5cf6', cyan: '#06b6d4', blue: '#3b82f6',
+  series: ['#f59e0b', '#06b6d4', '#8b5cf6', '#10b981', '#ef4444', '#3b82f6', '#ec4899', '#eab308', '#14b8a6', '#a855f7'],
+  status: { running: '#10b981', loading: '#06b6d4', hauling: '#3b82f6', idle: '#f59e0b', breakdown: '#ef4444', maintenance: '#8b5cf6', offline: '#64748b' },
+  severity: { info: '#0ea5e9', warning: '#f59e0b', critical: '#ef4444' },
+  map: { ground: '#14161c', groundAlt: '#1a1d24', bench: '#222630', benchLine: 'rgba(245,158,11,0.2)', road: '#2b303d', roadEdge: '#3d4454', zone: 'rgba(255,255,255,0.05)', water: '#0e2a3f', dump: '#20242d' },
 };
 
 const light: Palette = {

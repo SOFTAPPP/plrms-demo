@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Check, Command, FlaskConical, KeyRound, Keyboard, LogOut, Moon, Search, Sun, Volume2, VolumeX, Wifi, WifiOff } from 'lucide-react';
+import { Bell, Check, Command, FlaskConical, KeyRound, Keyboard, LogOut, Moon, Search, Sun, Volume2, VolumeX } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { navTitle } from './nav';
@@ -20,18 +20,38 @@ function SimClock() {
   const connected = useLive((s) => s.connected);
   const d = new Date(t);
   return (
-    <div className="hidden items-center gap-3 rounded-xl border border-line bg-panel-2/70 px-3 py-1.5 md:flex">
-      <Tip content={connected ? 'Live data connected' : 'Reconnecting to the live feed…'}>
-        <span className={cn('flex items-center', connected ? 'text-ok' : 'text-crit')}>{connected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4 animate-pulse" />}</span>
+    <div className="hidden items-center gap-3 rounded-lg border border-line bg-panel-2/80 px-3 py-1.5 shadow-sm md:flex">
+      <Tip content={connected ? 'Live telemetry connected' : 'Reconnecting to fleet feed…'}>
+        <span className="flex items-center gap-1.5">
+          {connected ? (
+            <>
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ok opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-ok" />
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-ok">Live</span>
+            </>
+          ) : (
+            <>
+              <span className="h-2 w-2 rounded-full bg-crit animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-crit">Offline</span>
+            </>
+          )}
+        </span>
       </Tip>
-      <div className="leading-none">
-        <p className="tnum font-mono text-[15px] font-semibold tracking-wide">{time(t, true)}</p>
+      <div className="border-l border-line pl-2.5 leading-none">
+        <p className="tnum font-mono text-[13px] font-semibold tracking-wide text-fg">{time(t, true)}</p>
         <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted">{d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}</p>
       </div>
       {kpi && (
-        <div className="border-l border-line pl-3 leading-none">
-          <p className="text-xs font-semibold">Shift {kpi.shift} · {kpi.shiftName}</p>
-          <div className="mt-1 h-1 w-20 overflow-hidden rounded-full bg-fg/10"><div className="h-full bg-accent" style={{ width: `${kpi.shiftProgress * 100}%` }} /></div>
+        <div className="border-l border-line pl-2.5 leading-none">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-medium text-fg">Shift {kpi.shift} · {kpi.shiftName}</span>
+            <span className="tnum text-[11px] font-semibold text-accent">{Math.round(kpi.shiftProgress * 100)}%</span>
+          </div>
+          <div className="mt-1 h-1.5 w-24 overflow-hidden rounded-full bg-fg/10">
+            <div className="h-full rounded-full bg-accent transition-all duration-300" style={{ width: `${kpi.shiftProgress * 100}%` }} />
+          </div>
         </div>
       )}
       {(speed > 1 || paused) && <Badge tone={paused ? 'warn' : 'accent'}>{paused ? 'Paused' : `${speed}× speed`}</Badge>}
