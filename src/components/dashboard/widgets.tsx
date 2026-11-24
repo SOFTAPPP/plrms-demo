@@ -122,7 +122,7 @@ export function StatusWidget() {
   if (!k || !option) return <Card title="Fleet status" className="h-full"><Skeleton className="h-[300px]" /></Card>;
   const total = order.reduce((s, x) => s + k.statusCounts[x], 0);
   return (
-    <Card title="Fleet status" subtitle={`${total} machines`} className="h-full" bodyClassName="flex flex-col justify-between">
+    <Card title="Fleet status" subtitle={`${total} machines`} className="h-full" bodyClassName="flex flex-col justify-between" actions={<Link to="/fleet" className="text-xs text-muted hover:text-accent">Fleet</Link>}>
       <div className="relative">
         <EChart option={option} height={190} onClick={() => navigate('/fleet')} />
         <div className="pointer-events-none absolute inset-0 grid place-items-center">
@@ -176,7 +176,8 @@ export function ActivityWidget() {
   const feed = useLive((s) => s.feed);
   const now = useLive((s) => s.t);
   return (
-    <Card title="Activity" subtitle="Dispatch, loads, shifts and safety events" flush className="h-full" bodyClassName="h-[356px] overflow-y-auto scroll-thin">
+    <Card title="Activity" subtitle="Dispatch, loads, shifts and safety events" flush className="h-full" bodyClassName="h-[356px] overflow-y-auto scroll-thin"
+      actions={<Link to="/alerts" className="text-xs text-muted hover:text-accent">Alerts</Link>}>
       {!feed.length && <EmptyState title="Listening for events" message="Loads, refuels and alerts will stream in here." icon={<Clock className="h-5 w-5" />} />}
       <ul>
         {feed.map((e) => (
@@ -276,7 +277,8 @@ export function ShiftWidget() {
   const expected = k.shiftProgress;
   const onPace = frac >= expected * 0.97;
   return (
-    <Card title={`Shift ${k.shift} · ${k.shiftName}`} subtitle="Progress against the shift target" className="h-full" bodyClassName="flex flex-col justify-between">
+    <Card title={`Shift ${k.shift} · ${k.shiftName}`} subtitle="Progress against the shift target" className="h-full" bodyClassName="flex flex-col justify-between"
+      actions={<Link to="/production?tab=shifts" className="text-xs text-muted hover:text-accent">Shifts</Link>}>
       <div className="my-auto flex items-center gap-5 py-2">
         <Ring value={frac} size={132} stroke={11} color={onPace ? 'var(--ok)' : 'var(--warn)'}>
           <div className="text-center">

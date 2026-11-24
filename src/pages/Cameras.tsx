@@ -37,8 +37,12 @@ function LiveWall() {
   const [focus, setFocus] = useState<{ machineId: string; position: CameraPosition } | null>(null);
 
   useEffect(() => {
-    const cam = sp.get('cam') as CameraPosition | null;
     const m = sp.get('machine');
+    if (m) {
+      setMachineId(m);
+      setMode('machine');
+    }
+    const cam = sp.get('cam') as CameraPosition | null;
     if (m && cam) setFocus({ machineId: m, position: cam });
   }, [sp]);
 

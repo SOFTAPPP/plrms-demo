@@ -296,10 +296,29 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <p className="m-0 mt-6 text-center text-xs text-faint">
-              Demo roles (password <span className="font-mono">Demo@1234</span>): supervisor@strata.demo ·
-              operator@strata.demo · viewer@strata.demo
-            </p>
+            <div className="m-0 mt-6 text-center text-xs text-faint">
+              <p className="mb-2">Demo roles (click to fill, password <span className="font-mono text-fg/80">Demo@1234</span>):</p>
+              <div className="flex flex-wrap justify-center gap-1.5">
+                {[
+                  { role: 'Supervisor', email: 'supervisor@strata.demo' },
+                  { role: 'Operator', email: 'operator@strata.demo' },
+                  { role: 'Viewer', email: 'viewer@strata.demo' },
+                ].map((d) => (
+                  <button
+                    key={d.email}
+                    type="button"
+                    onClick={() => {
+                      setEmail(d.email);
+                      setPassword('Demo@1234');
+                      setError(null);
+                    }}
+                    className="rounded border border-line bg-panel px-2 py-0.5 text-[11px] text-muted transition-colors hover:border-accent/50 hover:bg-accent/10 hover:text-accent"
+                  >
+                    {d.role}
+                  </button>
+                ))}
+              </div>
+            </div>
             <p className="m-0 mt-6 text-center text-[10px] font-semibold uppercase tracking-widest text-faint">
               © {new Date().getFullYear()} Winteg Technologies · STRATA
             </p>

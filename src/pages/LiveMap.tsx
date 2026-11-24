@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useUnits } from '../lib/units';
 import { useSearchParams } from 'react-router-dom';
 import { Filter } from 'lucide-react';
@@ -17,6 +17,14 @@ export default function LiveMap() {
   const [sp] = useSearchParams();
   const [selected, setSelected] = useState<string | null>(sp.get('focus'));
   const [focus, setFocus] = useState<string | null>(sp.get('focus'));
+
+  useEffect(() => {
+    const f = sp.get('focus');
+    if (f) {
+      setSelected(f);
+      setFocus(f);
+    }
+  }, [sp]);
   const [q, setQ] = useState('');
   const [types, setTypes] = useState<MachineType[]>([]);
   const [statuses, setStatuses] = useState<MachineStatus[]>([]);

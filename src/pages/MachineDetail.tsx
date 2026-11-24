@@ -7,7 +7,8 @@ import { ArrowLeft, Bell, Box, CalendarClock, ClipboardList, Fuel, Gauge, Histor
 import { useBoot } from '../lib/app-store';
 import { useMachine, useLive } from '../lib/live';
 import { useQuery } from '../lib/hooks';
-import { qs } from '../lib/api';
+import { toast } from 'sonner';
+import { patch, qs } from '../lib/api';
 import { usePalette } from '../lib/palette';
 import { dateTime, duration, num, tonnes } from '../lib/format';
 import { NODE_BY_ID } from '../../shared/site';
@@ -274,9 +275,19 @@ function MaintTab({ id }: { id: string }) {
 }
 
 function DownTab({ id }: { id: string }) {
+  const boot = useBoot();
   const t = useLive((s) => Math.floor(s.t / 60_000) * 60_000);
   const q = useQuery<{ rows: DowntimeRow[] }>(`/downtime${qs({ machineId: id, from: t - 7 * 86_400_000, to: t + 60_000 })}`);
-  return <Card flush title="Downtime" subtitle="Last 7 days"><DowntimeTable rows={q.data?.rows ?? []} loading={q.loading} /></Card>;
+  const close = async (r: DowntimeRow) => {
+    try {
+      await patch(`/downtime/${r.id}`, { end: useLive.getState().t });
+      q.reload();
+      toast.success('Downtime closed');
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
+  };
+  return <Card flush title="Downtime" subtitle="Last 7 days"><DowntimeTable rows={q.data?.rows ?? []} loading={q.loading} onClose={can(boot.user.role, 'operate') ? close : undefined} /></Card>;
 }
 
 function AlertsTab({ id }: { id: string }) {

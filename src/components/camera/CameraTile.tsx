@@ -165,7 +165,7 @@ export const CameraTile = memo(function CameraTile({ machineId, position, fps = 
       )}
       {recording && <div className="absolute left-2 top-8 rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-white">REC</div>}
       {controls && (
-        <div className="absolute right-2 top-8 flex gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+        <div className="absolute right-2 top-8 z-20 flex gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
           {can(role, 'operate') && (
             <>
               <Tip content="Snapshot"><button type="button" aria-label="Take snapshot" className="grid h-7 w-7 place-items-center rounded-md bg-black/60 text-white hover:bg-black/80"

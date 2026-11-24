@@ -1,7 +1,7 @@
 // Live mine map: static site layer + moving machine markers, with pan/zoom, layers and a details card.
 import { useUnits } from '../../lib/units';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Crosshair, Layers, Maximize2, Minus, Plus, Route as RouteIcon, X } from 'lucide-react';
 import { BENCH_COUNT, EDGES, NODE_BY_ID, NODES, SITE_SIZE, ZONES, benchOutline } from '../../../shared/site';
 import type { MachineLive, MachineStatus, MachineType } from '../../../shared/types';
@@ -118,6 +118,7 @@ export function SiteMap({ className, selectedId: selProp, onSelect, focusId, com
   const p = usePalette();
   const U = useUnits();
   const machines = useLive((s) => s.machines);
+  const navigate = useNavigate();
   const [boxRef, size] = useElementSize<HTMLDivElement>();
   const [view, setView] = useState<View>(FULL);
   const [selInternal, setSelInternal] = useState<string | null>(null);
@@ -292,8 +293,8 @@ export function SiteMap({ className, selectedId: selProp, onSelect, focusId, com
           </dl>
           <p className="mt-2 truncate text-xs text-muted">Operator: <span className="text-fg">{sel.op || 'Unassigned'}</span></p>
           <div className="mt-3 flex gap-1.5">
-            <Link to={`/fleet/${sel.id}`} className="flex-1"><Button size="xs" variant="primary" className="w-full justify-center">Details</Button></Link>
-            <Link to={`/cameras?machine=${sel.id}`}><Button size="xs">Cameras</Button></Link>
+            <Button size="xs" variant="primary" className="flex-1 justify-center" onClick={() => navigate(`/fleet/${sel.id}`)}>Details</Button>
+            <Button size="xs" onClick={() => navigate(`/cameras?machine=${sel.id}`)}>Cameras</Button>
             <Button size="xs" variant={follow ? 'primary' : 'secondary'} aria-label="Follow" onClick={() => setFollow(!follow)} icon={<Crosshair className="h-3 w-3" />} />
           </div>
           {sel.route && <p className="mt-2 flex items-center gap-1 text-[11px] text-faint"><RouteIcon className="h-3 w-3" /> {sel.route} · loader {sel.loader}</p>}

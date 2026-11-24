@@ -173,7 +173,7 @@ function Routes({ d, p }: { d: ProdSummary; p: Palette }) {
   return (
     <div className="flex flex-col gap-4">
       <Card title="Cycle-time breakdown by route" subtitle="Average minutes per stage, diamond = target cycle"><EChart option={opt} height={Math.max(240, d.byRoute.length * 46)} /></Card>
-      <Card flush title="Haul routes"><DataTable columns={cols} rows={d.byRoute} rowKey={(r) => r.id} /></Card>
+      <Card flush title="Haul routes" actions={<ExportBtn name="routes" rows={d.byRoute} />}><DataTable columns={cols} rows={d.byRoute} rowKey={(r) => r.id} /></Card>
     </div>
   );
 }
@@ -215,7 +215,7 @@ function Shifts({ d, p }: { d: ProdSummary; p: Palette }) {
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
       <Card title="Tonnes by shift" subtitle="Per mine day" className="xl:col-span-2"><EChart option={opt} height={340} key={p.bg} /></Card>
-      <Card flush title="Top truck operators" subtitle="By tonnes hauled"><DataTable columns={cols} rows={d.topOperators} rowKey={(r) => r.id} /></Card>
+      <Card flush title="Top truck operators" subtitle="By tonnes hauled" actions={<ExportBtn name="operators" rows={d.topOperators} />}><DataTable columns={cols} rows={d.topOperators} rowKey={(r) => r.id} /></Card>
     </div>
   );
 }
