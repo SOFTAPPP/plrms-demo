@@ -71,9 +71,9 @@ export const KpiStrip = memo(function KpiStrip() {
 export function MapWidget() {
   const navigate = useNavigate();
   return (
-    <Card title="Live site map" subtitle="Machines update twice a second" flush bodyClassName="h-[440px]"
+    <Card title="Live site map" subtitle="Machines update twice a second" flush className="h-full" bodyClassName="min-h-[440px] flex-1 flex flex-col"
       actions={<button type="button" onClick={() => navigate('/map')} className="inline-flex items-center gap-1 text-xs text-muted hover:text-accent">Full map <ArrowUpRight className="h-3.5 w-3.5" /></button>}>
-      <SiteMap compact className="rounded-b-[14px]" />
+      <SiteMap compact className="flex-1 rounded-b-[14px]" />
     </Card>
   );
 }
@@ -98,7 +98,7 @@ export function ProductionWidget() {
     ],
   }), [q.data]);
   return (
-    <Card title="Production · last 24 hours" subtitle="Tonnes delivered per hour" actions={<Link to="/production" className="text-xs text-muted hover:text-accent">Details</Link>}>
+    <Card title="Production · last 24 hours" subtitle="Tonnes delivered per hour" className="h-full" bodyClassName="flex flex-col justify-between" actions={<Link to="/production" className="text-xs text-muted hover:text-accent">Details</Link>}>
       {q.data ? <EChart option={option} height={300} /> : <Skeleton className="h-[300px]" />}
     </Card>
   );
@@ -119,10 +119,10 @@ export function StatusWidget() {
       data: order.filter((s) => k.statusCounts[s] > 0).map((s) => ({ name: STATUS_LABEL[s], value: k.statusCounts[s], itemStyle: { color: pp.status[s] } })),
     }],
   })), [k]);
-  if (!k || !option) return <Card title="Fleet status"><Skeleton className="h-[300px]" /></Card>;
+  if (!k || !option) return <Card title="Fleet status" className="h-full"><Skeleton className="h-[300px]" /></Card>;
   const total = order.reduce((s, x) => s + k.statusCounts[x], 0);
   return (
-    <Card title="Fleet status" subtitle={`${total} machines`}>
+    <Card title="Fleet status" subtitle={`${total} machines`} className="h-full" bodyClassName="flex flex-col justify-between">
       <div className="relative">
         <EChart option={option} height={190} onClick={() => navigate('/fleet')} />
         <div className="pointer-events-none absolute inset-0 grid place-items-center">
@@ -148,7 +148,7 @@ export function AlertsWidget() {
   const now = useLive((s) => s.t);
   const navigate = useNavigate();
   return (
-    <Card title="Open alerts" subtitle={`${alerts.length} need attention`} flush bodyClassName="h-[440px] overflow-y-auto scroll-thin"
+    <Card title="Open alerts" subtitle={`${alerts.length} need attention`} flush className="h-full" bodyClassName="min-h-[440px] flex-1 overflow-y-auto scroll-thin"
       actions={<Link to="/alerts" className="text-xs text-muted hover:text-accent">All alerts</Link>}>
       {!alerts.length && <EmptyState title="All clear" message="No open alerts right now." icon={<AlertTriangle className="h-5 w-5" />} />}
       {alerts.slice(0, 30).map((a) => (
@@ -176,7 +176,7 @@ export function ActivityWidget() {
   const feed = useLive((s) => s.feed);
   const now = useLive((s) => s.t);
   return (
-    <Card title="Activity" subtitle="Dispatch, loads, shifts and safety events" flush bodyClassName="h-[300px] overflow-y-auto scroll-thin">
+    <Card title="Activity" subtitle="Dispatch, loads, shifts and safety events" flush className="h-full" bodyClassName="h-[356px] overflow-y-auto scroll-thin">
       {!feed.length && <EmptyState title="Listening for events" message="Loads, refuels and alerts will stream in here." icon={<Clock className="h-5 w-5" />} />}
       <ul>
         {feed.map((e) => (
@@ -198,7 +198,7 @@ export function LoadersWidget() {
   const loaders = Object.values(machines).filter((m) => m.type === 'shovel' || m.type === 'excavator' || m.type === 'loader');
   const p = usePalette();
   return (
-    <Card title="Loading units" subtitle="Status, queue and passes this shift" flush bodyClassName="h-[300px] overflow-y-auto scroll-thin"
+    <Card title="Loading units" subtitle="Status, queue and passes this shift" flush className="h-full" bodyClassName="h-[300px] overflow-y-auto scroll-thin"
       actions={<Link to="/fleet/dispatch" className="text-xs text-muted hover:text-accent">Dispatch</Link>}>
       {loaders.map((m) => {
         const Icon = TYPE_ICON[m.type];
@@ -227,7 +227,7 @@ export function FuelWidget() {
   const U = useUnits();
   const list = Object.values(machines).sort((a, b) => (a.s.fuel_level ?? 100) - (b.s.fuel_level ?? 100)).slice(0, 8);
   return (
-    <Card title="Lowest fuel levels" flush bodyClassName="h-[300px] overflow-y-auto scroll-thin px-4 py-2" actions={<Link to="/fuel" className="text-xs text-muted hover:text-accent">Fuel</Link>}>
+    <Card title="Lowest fuel levels" flush className="h-full" bodyClassName="h-[356px] overflow-y-auto scroll-thin px-4 py-2" actions={<Link to="/fuel" className="text-xs text-muted hover:text-accent">Fuel</Link>}>
       {list.map((m) => {
         const f = m.s.fuel_level ?? 0;
         const color = f < 15 ? 'var(--crit)' : f < 25 ? 'var(--warn)' : 'var(--ok)';
@@ -256,10 +256,12 @@ export function CameraWidget() {
     return () => clearInterval(id);
   }, [cams.length]);
   const cam = cams[(i * 7) % Math.max(1, cams.length)];
-  if (!cam) return <Card title="Camera spotlight"><EmptyState title="No cameras" /></Card>;
+  if (!cam) return <Card title="Camera spotlight" className="h-full"><EmptyState title="No cameras" /></Card>;
   return (
-    <Card title="Camera spotlight" subtitle="Rotates every 12 seconds" actions={<Link to={`/cameras?machine=${cam.machineId}`} className="text-xs text-muted hover:text-accent">Open</Link>}>
-      <CameraTile key={cam.id} machineId={cam.machineId} position={cam.position} fps={10} maxW={560} />
+    <Card title="Camera spotlight" subtitle="Rotates every 12 seconds" className="h-full" bodyClassName="flex flex-col justify-between" actions={<Link to={`/cameras?machine=${cam.machineId}`} className="text-xs text-muted hover:text-accent">Open</Link>}>
+      <div className="overflow-hidden rounded-lg">
+        <CameraTile key={cam.id} machineId={cam.machineId} position={cam.position} fps={10} maxW={560} />
+      </div>
       <p className="mt-2 text-xs text-muted">{cam.machineId} · {cam.position} camera · {cam.resolution}</p>
     </Card>
   );
@@ -269,13 +271,13 @@ export function CameraWidget() {
 
 export function ShiftWidget() {
   const k = useKpi();
-  if (!k) return <Card title="Shift target"><Skeleton className="h-[300px]" /></Card>;
+  if (!k) return <Card title="Shift target" className="h-full"><Skeleton className="h-[300px]" /></Card>;
   const frac = k.tonnesShift / k.targetShift;
   const expected = k.shiftProgress;
   const onPace = frac >= expected * 0.97;
   return (
-    <Card title={`Shift ${k.shift} · ${k.shiftName}`} subtitle="Progress against the shift target">
-      <div className="flex items-center gap-5">
+    <Card title={`Shift ${k.shift} · ${k.shiftName}`} subtitle="Progress against the shift target" className="h-full" bodyClassName="flex flex-col justify-between">
+      <div className="my-auto flex items-center gap-5 py-2">
         <Ring value={frac} size={132} stroke={11} color={onPace ? 'var(--ok)' : 'var(--warn)'}>
           <div className="text-center">
             <p className="tnum font-display text-2xl font-semibold">{num(frac * 100)}%</p>
@@ -288,7 +290,9 @@ export function ShiftWidget() {
           <Badge tone={onPace ? 'ok' : 'warn'}>{onPace ? 'On pace' : 'Behind pace'} · {num(expected * 100)}% of shift elapsed</Badge>
         </div>
       </div>
-      <div className="mt-5 flex items-center gap-2 text-xs text-muted"><Truck className="h-3.5 w-3.5" /> {k.loadsDay} loads today · mine day {k.mineDay}</div>
+      <div className="mt-auto flex items-center gap-2 border-t border-line/60 pt-3 text-xs text-muted">
+        <Truck className="h-3.5 w-3.5" /> {k.loadsDay} loads today · mine day {k.mineDay}
+      </div>
     </Card>
   );
 }

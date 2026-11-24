@@ -46,15 +46,27 @@ function LiveWall() {
   const fleetCams = boot.cameras.filter((c) => c.position === position && c.enabled);
   const pages = Math.max(1, Math.ceil(fleetCams.length / grid));
   const shown = fleetCams.slice(page * grid, page * grid + grid);
-  const cols = grid === 4 ? 'md:grid-cols-2' : grid === 9 ? 'md:grid-cols-2 xl:grid-cols-3' : 'md:grid-cols-3 xl:grid-cols-4';
   const list = boot.machines.filter((m) => !q || m.id.toLowerCase().includes(q.toLowerCase()));
   const positions = [...new Set(boot.cameras.map((c) => c.position))] as CameraPosition[];
 
+  const gridConfig = useMemo(() => {
+    if (mode === 'machine') {
+      const n = machineCams.length;
+      if (n <= 1) return { cols: 1, rows: 1 };
+      if (n <= 2) return { cols: 2, rows: 1 };
+      if (n <= 4) return { cols: 2, rows: 2 };
+      return { cols: 3, rows: 2 };
+    }
+    if (grid === 4) return { cols: 2, rows: 2 };
+    if (grid === 16) return { cols: 4, rows: 4 };
+    return { cols: 3, rows: 3 };
+  }, [mode, machineCams.length, grid]);
+
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[230px_minmax(0,1fr)]">
-      <div className="panel flex max-h-[calc(100vh-250px)] flex-col">
-        <div className="border-b border-line p-2.5"><SearchInput value={q} onChange={setQ} placeholder="Machine" /></div>
-        <ul className="scroll-thin flex-1 overflow-y-auto p-1.5">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[230px_minmax(0,1fr)] lg:h-[calc(100vh-215px)] lg:min-h-[500px]">
+      <div className="panel flex h-full min-h-0 flex-col overflow-hidden">
+        <div className="shrink-0 border-b border-line p-2.5"><SearchInput value={q} onChange={setQ} placeholder="Machine" /></div>
+        <ul className="scroll-thin flex-1 min-h-0 overflow-y-auto p-1.5">
           {list.map((m) => {
             const Icon = TYPE_ICON[m.type];
             const l = machines[m.id];
@@ -72,8 +84,8 @@ function LiveWall() {
           })}
         </ul>
       </div>
-      <div className="min-w-0">
-        <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+        <div className="mb-2.5 flex shrink-0 flex-wrap items-center gap-2">
           <Segmented value={mode} onChange={setMode} options={[{ value: 'machine', label: 'One machine' }, { value: 'fleet', label: 'Fleet wall' }]} />
           {mode === 'fleet' ? (
             <>
@@ -98,18 +110,36 @@ function LiveWall() {
             </div>
           )}
         </div>
-        {mode === 'machine' ? (
-          machineCams.length ? (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-3">
-              {machineCams.map((c) => <CameraTile key={c.id} machineId={c.machineId} position={c.position} fps={12} maxW={640} onExpand={() => setFocus({ machineId: c.machineId, position: c.position })} />)}
+        <div className="flex-1 min-h-0 w-full overflow-hidden">
+          {mode === 'machine' ? (
+            machineCams.length ? (
+              <div
+                className="grid h-full w-full gap-2"
+                style={{
+                  gridTemplateColumns: `repeat(${gridConfig.cols}, minmax(0, 1fr))`,
+                  gridTemplateRows: `repeat(${gridConfig.rows}, minmax(0, 1fr))`,
+                }}
+              >
+                {machineCams.map((c) => (
+                  <CameraTile key={c.id} machineId={c.machineId} position={c.position} fps={12} maxW={640} fitContainer onExpand={() => setFocus({ machineId: c.machineId, position: c.position })} />
+                ))}
+              </div>
+            ) : <EmptyState title="No cameras on this machine" icon={<Video className="h-5 w-5" />} />
+          ) : (
+            <div
+              className="grid h-full w-full gap-2"
+              style={{
+                gridTemplateColumns: `repeat(${gridConfig.cols}, minmax(0, 1fr))`,
+                gridTemplateRows: `repeat(${gridConfig.rows}, minmax(0, 1fr))`,
+              }}
+            >
+              {shown.map((c) => (
+                <CameraTile key={c.id} machineId={c.machineId} position={c.position} fps={grid === 16 ? 6 : 10} maxW={grid === 16 ? 360 : 480} fitContainer onExpand={() => setFocus({ machineId: c.machineId, position: c.position })} />
+              ))}
             </div>
-          ) : <EmptyState title="No cameras on this machine" icon={<Video className="h-5 w-5" />} />
-        ) : (
-          <div className={cn('grid grid-cols-1 gap-2', cols)}>
-            {shown.map((c) => <CameraTile key={c.id} machineId={c.machineId} position={c.position} fps={grid === 16 ? 6 : 10} maxW={grid === 16 ? 360 : 480} onExpand={() => setFocus({ machineId: c.machineId, position: c.position })} />)}
-          </div>
-        )}
-        <p className="mt-3 text-xs text-faint">Hover a feed for snapshot, record and full-screen controls. Feeds pause when scrolled out of view to keep the app fast.</p>
+          )}
+        </div>
+        <p className="mt-2 shrink-0 text-xs text-faint">Hover a feed for snapshot, record and full-screen controls. Feeds pause when scrolled out of view to keep the app fast.</p>
       </div>
       <Dialog open={Boolean(focus)} onOpenChange={(o) => { if (!o) { setFocus(null); const nx = new URLSearchParams(sp); nx.delete('cam'); setSp(nx, { replace: true }); } }} size="xl"
         title={focus ? `${focus.machineId} · ${CAMERA_LABEL[focus.position]} camera` : ''} description={focus ? machines[focus.machineId]?.act : undefined}

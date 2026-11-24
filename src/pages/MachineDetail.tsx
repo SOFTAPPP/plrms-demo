@@ -39,7 +39,7 @@ const TELE_FIELDS: { key: keyof TelemetryPoint; label: string; dim: Dimension }[
   { key: 'hyd', label: 'Hydraulic pressure', dim: 'pressure_bar' }, { key: 'vib', label: 'Vibration', dim: 'vibration' }, { key: 'bat', label: 'Battery', dim: 'voltage' },
 ];
 
-export function TelemetryChart({ machineId, initialKey = 'spd' }: { machineId: string; initialKey?: keyof TelemetryPoint }) {
+export function TelemetryChart({ machineId, initialKey = 'spd', height = 480 }: { machineId: string; initialKey?: keyof TelemetryPoint; height?: number }) {
   const t = useLive((s) => Math.floor(s.t / 30_000) * 30_000);
   const [hours, setHours] = useState(2);
   const [key, setKey] = useState<keyof TelemetryPoint>(initialKey);
@@ -63,7 +63,13 @@ export function TelemetryChart({ machineId, initialKey = 'spd' }: { machineId: s
         <Segmented size="sm" value={hours} onChange={setHours} options={[{ value: 2, label: '2 h' }, { value: 12, label: '12 h' }, { value: 48, label: '48 h' }]} />
       </div>
     }>
-      {q.loading && !q.data ? <Skeleton className="h-64" /> : rows.length < 2 ? <EmptyState title="No readings for this sensor" message="This machine does not report this value." /> : <EChart option={option} height={260} />}
+      {q.loading && !q.data ? (
+        <div style={{ height: `${height}px` }}><Skeleton className="h-full w-full" /></div>
+      ) : rows.length < 2 ? (
+        <EmptyState title="No readings for this sensor" message="This machine does not report this value." />
+      ) : (
+        <EChart option={option} height={height} />
+      )}
     </Card>
   );
 }

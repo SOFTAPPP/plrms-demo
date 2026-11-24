@@ -24,8 +24,9 @@ function sizeCanvas(v: View) {
   // 1.5× is sharp on high-DPI screens; full 2× quadruples the pixels every frame for little gain
   const dpr = Math.min(1.5, window.devicePixelRatio || 1);
   const cw = v.canvas.clientWidth || 320;
+  const ch = v.canvas.clientHeight || Math.round((cw * 9) / 16);
   const w = Math.max(240, Math.min(v.maxW, Math.round(cw * dpr)));
-  const h = Math.round((w * 9) / 16);
+  const h = Math.max(120, Math.round(ch * dpr));
   if (v.canvas.width !== w || v.canvas.height !== h) {
     v.canvas.width = w;
     v.canvas.height = h;

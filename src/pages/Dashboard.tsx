@@ -39,7 +39,7 @@ function Tile({ item, editing, onRemove, onResize }: { item: WidgetLayoutItem; e
   const Render = W.render;
   return (
     <div ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }}
-      className={cn(SPAN[item.size], 'relative min-w-0', isDragging && 'z-20 opacity-80', editing && 'rounded-[16px] ring-2 ring-dashed ring-accent/40 ring-offset-4 ring-offset-bg')}>
+      className={cn(SPAN[item.size], 'relative min-w-0 flex flex-col', isDragging && 'z-20 opacity-80', editing && 'rounded-[16px] ring-2 ring-dashed ring-accent/40 ring-offset-4 ring-offset-bg')}>
       {editing && (
         <div className="absolute -top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-line-strong bg-elev px-1.5 py-1 shadow-lg">
           <button type="button" {...attributes} {...listeners} aria-label={`Drag ${W.title}`} className="grid h-6 w-6 cursor-grab place-items-center rounded-full text-muted hover:bg-fg/10 hover:text-fg active:cursor-grabbing"><GripVertical className="h-3.5 w-3.5" /></button>
@@ -48,7 +48,7 @@ function Tile({ item, editing, onRemove, onResize }: { item: WidgetLayoutItem; e
           <button type="button" onClick={onRemove} aria-label={`Remove ${W.title}`} className="grid h-6 w-6 place-items-center rounded-full text-muted hover:bg-crit/20 hover:text-crit"><X className="h-3.5 w-3.5" /></button>
         </div>
       )}
-      <div className={cn('h-full', editing && 'pointer-events-none select-none')}>
+      <div className={cn('flex flex-1 flex-col h-full w-full [&>section]:h-full [&>section]:flex-1', editing && 'pointer-events-none select-none')}>
         <ErrorBoundary compact><Render /></ErrorBoundary>
       </div>
     </div>

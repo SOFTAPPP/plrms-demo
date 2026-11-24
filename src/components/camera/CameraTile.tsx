@@ -56,9 +56,10 @@ interface Props {
   controls?: boolean;
   onExpand?: () => void;
   showLabel?: boolean;
+  fitContainer?: boolean;
 }
 
-export const CameraTile = memo(function CameraTile({ machineId, position, fps = 12, maxW = 640, className, controls = true, onExpand, showLabel = true }: Props) {
+export const CameraTile = memo(function CameraTile({ machineId, position, fps = 12, maxW = 640, className, controls = true, onExpand, showLabel = true, fitContainer = false }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const handle = useRef<CameraHandle | null>(null);
@@ -133,9 +134,29 @@ export const CameraTile = memo(function CameraTile({ machineId, position, fps = 
   }, [full]);
 
   return (
-    <div ref={wrapRef} data-fullscreen={full || undefined} className={cn('group overflow-hidden bg-black', full ? 'fixed inset-0 z-[90] grid place-items-center' : cn('relative rounded-xl border border-line', className))}>
-      <canvas ref={canvasRef} className="block aspect-video h-auto w-full" style={full ? { width: 'min(100vw, calc(100vh * 16 / 9))' } : undefined}
-        aria-label={`${machineId} ${position} camera, live`} />
+    <div
+      ref={wrapRef}
+      data-fullscreen={full || undefined}
+      className={cn(
+        'group overflow-hidden bg-black',
+        full
+          ? 'fixed inset-0 z-[90] grid place-items-center'
+          : cn(
+              'relative rounded-xl border border-line',
+              fitContainer ? 'h-full w-full' : '',
+              className
+            )
+      )}
+    >
+      <canvas
+        ref={canvasRef}
+        className={cn(
+          'block',
+          full ? 'aspect-video h-auto w-full' : fitContainer ? 'h-full w-full object-cover' : 'aspect-video h-auto w-full'
+        )}
+        style={full ? { width: 'min(100vw, calc(100vh * 16 / 9))' } : undefined}
+        aria-label={`${machineId} ${position} camera, live`}
+      />
       {full && <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded bg-black/60 px-2 py-1 text-xs text-white/80">Esc or the full-screen button to close</p>}
       {showLabel && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2.5 pb-1.5 pt-6 opacity-0 transition-opacity group-hover:opacity-100">

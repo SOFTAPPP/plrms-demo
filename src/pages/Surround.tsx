@@ -31,7 +31,7 @@ export function SurroundViews({ machineId, height = 560 }: { machineId: string; 
     );
   }
   return (
-    <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(0,1fr)_420px]">
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_440px] 2xl:grid-cols-[minmax(0,1fr)_480px]">
       <Card flush title={mode === 'panorama' ? '360° camera view' : mode === 'birdseye' ? 'Bird’s-eye around view' : '3D digital twin'}
         subtitle={mode === 'panorama' ? 'Live front, right, rear and left cameras stitched into one ring — drag to look around'
           : mode === 'birdseye' ? 'Ground from the four cameras warped into a top-down view, with proximity zones'
@@ -67,12 +67,12 @@ export function SurroundViews({ machineId, height = 560 }: { machineId: string; 
           </div>
         )}
       </Card>
-      <Card title="Surround cameras" subtitle="The four feeds the 360° view is built from">
-        <div className="grid grid-cols-2 gap-2">
+      <Card title="Surround cameras" subtitle="The four feeds the 360° view is built from" className="h-full" bodyClassName="flex flex-col">
+        <div className="grid flex-1 grid-cols-2 grid-rows-2 gap-3 min-h-0">
           {ring.map((c) => (
-            <div key={`${machineId}-${c}`}>
-              <CameraTile machineId={machineId} position={c} fps={10} maxW={400} />
-              <p className="mt-1 text-center text-[11px] text-muted">{CAMERA_LABEL[c]}</p>
+            <div key={`${machineId}-${c}`} className="flex flex-col min-h-0">
+              <CameraTile machineId={machineId} position={c} fps={10} maxW={500} fitContainer className="flex-1 min-h-0" />
+              <p className="mt-1.5 shrink-0 text-center text-[11px] font-medium text-muted">{CAMERA_LABEL[c]}</p>
             </div>
           ))}
         </div>

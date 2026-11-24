@@ -1,4 +1,5 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
+import { Activity, Layers, LayoutGrid } from 'lucide-react';
 import { useBoot } from '../../lib/app-store';
 import { history, useLive, useMachine } from '../../lib/live';
 import { sensorText } from '../../lib/format';
@@ -14,21 +15,40 @@ export function useMachineDefs(m: MachineLive | undefined): SensorDef[] {
   return useMemo(() => (m ? defs.filter((d) => d.enabled && d.types.includes(m.type)) : []), [defs, m?.type]); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
-const SensorTile = memo(function SensorTile({ def, m }: { def: SensorDef; m: MachineLive }) {
+const SensorTile = memo(function SensorTile({
+  def,
+  m,
+  showGroup,
+}: {
+  def: SensorDef;
+  m: MachineLive;
+  showGroup?: boolean;
+}) {
   const units = useBoot().settings.units;
   useLive((s) => s.frameNo);
   const v = m.s[def.key];
   const state = sensorState(def, v);
   const { value, unit } = sensorText(v, def.dimension, units, def.decimals);
   return (
-    <div className={cn('rounded-xl border bg-panel-2/60 p-3', state === 'critical' ? 'border-crit/40' : state === 'warning' ? 'border-warn/40' : 'border-line')}>
-      <div className="flex items-center justify-between gap-2">
-        <p className="truncate text-xs text-muted">{def.label}</p>
-        {state !== 'normal' && <Badge tone={state === 'critical' ? 'crit' : 'warn'}>{state}</Badge>}
+    <div
+      className={cn(
+        'flex flex-col justify-between rounded-xl border bg-panel-2/60 p-3 min-h-[102px]',
+        state === 'critical' ? 'border-crit/40' : state === 'warning' ? 'border-warn/40' : 'border-line'
+      )}
+    >
+      <div>
+        <div className="flex items-center justify-between gap-1.5">
+          <p className="truncate text-xs text-muted" title={def.label}>{def.label}</p>
+          {state !== 'normal' ? (
+            <Badge tone={state === 'critical' ? 'crit' : 'warn'}>{state}</Badge>
+          ) : showGroup ? (
+            <span className="text-[10px] uppercase font-semibold text-faint tracking-wider">{GROUP_LABEL[def.group]}</span>
+          ) : null}
+        </div>
+        <p className="tnum mt-1 font-display text-lg font-semibold" style={{ color: state === 'normal' ? undefined : STATE_COLOR[state] }}>
+          {v === undefined ? <span className="text-sm font-normal text-faint">awaiting data</span> : <>{value}<span className="ml-1 text-xs font-medium text-muted">{unit}</span></>}
+        </p>
       </div>
-      <p className="tnum mt-1 font-display text-lg font-semibold" style={{ color: state === 'normal' ? undefined : STATE_COLOR[state] }}>
-        {v === undefined ? <span className="text-sm font-normal text-faint">awaiting data</span> : <>{value}<span className="ml-1 text-xs font-medium text-muted">{unit}</span></>}
-      </p>
       <Sparkline values={history(`${m.id}:${def.key}`)} color={state === 'normal' ? 'var(--accent)' : STATE_COLOR[state]} height={26} className="mt-1" />
     </div>
   );
@@ -106,8 +126,18 @@ export function DiggerDiagram({ m }: { m: MachineLive }) {
 export function SensorPanel({ machineId }: { machineId: string }) {
   const m = useMachine(machineId);
   const defs = useMachineDefs(m);
+  const [selectedGroup, setSelectedGroup] = useState<'all' | SensorGroup>('all');
+  const [viewMode, setViewMode] = useState<'grouped' | 'grid'>('grouped');
+
+  const groups = useMemo(() => [...new Set(defs.map((d) => d.group))] as SensorGroup[], [defs]);
+
+  const filteredDefs = useMemo(() => {
+    if (selectedGroup === 'all') return defs;
+    return defs.filter((d) => d.group === selectedGroup);
+  }, [defs, selectedGroup]);
+
   if (!m) return <EmptyState title="Machine not reporting" message="Waiting for live data from this machine." />;
-  const groups = [...new Set(defs.map((d) => d.group))] as SensorGroup[];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="panel p-4"><SensorGauges m={m} defs={defs} /></div>
@@ -117,14 +147,112 @@ export function SensorPanel({ machineId }: { machineId: string }) {
           {m.tp ? <TyreDiagram m={m} /> : <DiggerDiagram m={m} />}
         </div>
       )}
-      {groups.map((g) => (
-        <section key={g}>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{GROUP_LABEL[g]}</p>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
-            {defs.filter((d) => d.group === g).map((d) => <SensorTile key={d.key} def={d} m={m} />)}
+
+      <div className="panel flex flex-col gap-4 p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3.5">
+          <div className="flex items-center gap-2.5">
+            <Activity className="h-4 w-4 text-accent" />
+            <h3 className="font-display text-sm font-semibold text-fg">Telemetry & Subsystems</h3>
+            <Badge tone="neutral">{filteredDefs.length} {filteredDefs.length === 1 ? 'sensor' : 'sensors'}</Badge>
           </div>
-        </section>
-      ))}
+          <div className="flex items-center gap-1 rounded-lg border border-line bg-panel-2/70 p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => setViewMode('grouped')}
+              className={cn(
+                'flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium transition-colors',
+                viewMode === 'grouped' ? 'bg-elev text-fg shadow-sm' : 'text-muted hover:text-fg'
+              )}
+            >
+              <Layers className="h-3.5 w-3.5" />
+              <span>Grouped</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={cn(
+                'flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium transition-colors',
+                viewMode === 'grid' ? 'bg-elev text-fg shadow-sm' : 'text-muted hover:text-fg'
+              )}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              <span>Uniform Grid</span>
+            </button>
+          </div>
+        </div>
+
+        {/* System Filter Pills */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setSelectedGroup('all')}
+            className={cn(
+              'rounded-lg px-2.5 py-1 text-xs font-medium transition-colors border',
+              selectedGroup === 'all'
+                ? 'border-accent/40 bg-accent/15 text-accent font-semibold'
+                : 'border-line bg-panel-2/50 text-muted hover:border-line-strong hover:text-fg'
+            )}
+          >
+            All systems <span className="ml-1 text-[11px] opacity-70">({defs.length})</span>
+          </button>
+          {groups.map((g) => {
+            const count = defs.filter((d) => d.group === g).length;
+            const hasAlert = defs.some((d) => d.group === g && sensorState(d, m.s[d.key]) !== 'normal');
+            return (
+              <button
+                key={g}
+                type="button"
+                onClick={() => setSelectedGroup(g)}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors border',
+                  selectedGroup === g
+                    ? 'border-accent/40 bg-accent/15 text-accent font-semibold'
+                    : 'border-line bg-panel-2/50 text-muted hover:border-line-strong hover:text-fg'
+                )}
+              >
+                {hasAlert && <span className="h-1.5 w-1.5 rounded-full bg-warn animate-pulse" />}
+                <span>{GROUP_LABEL[g]}</span>
+                <span className="text-[11px] opacity-70">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Telemetry Display */}
+        {viewMode === 'grid' || selectedGroup !== 'all' ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-4">
+            {filteredDefs.map((d) => (
+              <SensorTile key={d.key} def={d} m={m} showGroup={selectedGroup === 'all'} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3 items-start">
+            {groups.map((g) => {
+              const groupDefs = defs.filter((d) => d.group === g);
+              const hasCrit = groupDefs.some((d) => sensorState(d, m.s[d.key]) === 'critical');
+              const hasWarn = groupDefs.some((d) => sensorState(d, m.s[d.key]) === 'warning');
+              return (
+                <div key={g} className="flex flex-col gap-3 rounded-xl border border-line bg-panel-2/40 p-3.5">
+                  <div className="flex items-center justify-between border-b border-line/60 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-display text-xs font-semibold uppercase tracking-wider text-fg">{GROUP_LABEL[g]}</span>
+                      {(hasCrit || hasWarn) && (
+                        <Badge tone={hasCrit ? 'crit' : 'warn'} dot>{hasCrit ? 'Critical' : 'Warning'}</Badge>
+                      )}
+                    </div>
+                    <span className="font-mono text-[11px] text-faint">{groupDefs.length} {groupDefs.length === 1 ? 'sensor' : 'sensors'}</span>
+                  </div>
+                  <div className={cn('grid gap-2.5', groupDefs.length === 1 ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2')}>
+                    {groupDefs.map((d) => (
+                      <SensorTile key={d.key} def={d} m={m} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

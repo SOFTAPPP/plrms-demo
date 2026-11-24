@@ -116,7 +116,7 @@ export default function Sensors() {
                 <span className="text-sm text-muted">{m.act} · {m.zone} · {m.op || 'no operator'}</span>
               </div>
             )}
-            {tab === 'live' ? <SensorPanel machineId={machineId} /> : <TelemetryChart key={machineId} machineId={machineId} initialKey="e_temp" />}
+            {tab === 'live' ? <SensorPanel machineId={machineId} /> : <TelemetryChart key={machineId} machineId={machineId} initialKey="e_temp" height={520} />}
           </div>
         </div>
       )}
